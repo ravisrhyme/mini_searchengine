@@ -1,0 +1,67 @@
+<html>
+<head>
+    <title>Solr Search</title>
+</head>
+<body>
+    <h3>Solr Search</h3>
+
+    Query: <input id="query" /> 
+    <input type="radio" name="scheme" value="default"/> Default
+    <input type="radio" name="scheme" value="pagerank"/> custom
+    
+    <button id="search">Search</button>
+    <hr/>
+    <div id="search_results">
+    </div>
+    
+    <script src="http://ajax.googleapis.com/ajax/libs/jquery/1.4.2/jquery.min.js"></script>
+<script>
+    function on_data(data) {
+        $('#search_results').empty();
+
+        var docs = data.response.docs;
+        $.each(docs, function(i, item) {
+		 //$('#search_results').append($('<div><a href= "'+ item.id +'" target=_blank>'+ item.id + '</a></div><br>'));
+            $('#search_results').append($('<div><a href= "'+ item.id +'" target=_blank>'+ item.id + '</a><br>'+item.description+'<br></div><br>'));
+        });
+
+        var total = 'Top ' + docs.length + ' results';
+        $('#search_results').prepend('<div>' + total + '</div>');
+    }
+
+    function on_data_test(data) {
+	$('#search_results').empty();
+	$('#search_results').append($('<div> Test </div>'));
+    }
+
+    function search_solr() {
+        var query = $('#query').val();
+	var scheme = $('input[name=scheme]:checked').val();
+	if (!(scheme)) {
+		alert("Please select default or custom");
+		return;
+	}
+	//$('#search_results').prepend('<div>' + query + '</div>');
+        if (query.length == 0) {
+            return;
+        }
+
+        var url='http://localhost:3000';
+	var queryObj = {"id": query,"value": scheme};
+        $.getJSON(url,queryObj,on_data);
+    }
+
+    function on_ready() {
+        $('#search').click(search_solr);
+        /* Hook enter to search */
+        $('body').keypress(function(e) {
+            if (e.keyCode == '13') {
+                search_solr();
+            }
+        });
+    }
+
+    $(document).ready(on_ready);
+</script>
+</body>
+</head>
